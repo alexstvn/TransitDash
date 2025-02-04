@@ -14,8 +14,9 @@ from plotly.subplots import make_subplots
 script_dir = os.path.dirname(__file__)
 
 # Construct the full path to the CSV file
-file_name = 'RidershipData.csv'
+# file_name = 'RidershipData.csv'
 # file_name = 'Fall2024_RidershipData.csv'
+file_name = 'Summer2024_RidershipData.csv'
 # file_name = '051524-051924_RidershipData.csv'
 
 file_path = os.path.join(script_dir, '..','data', file_name)
@@ -28,6 +29,9 @@ df = pd.read_csv(file_path)
 df.drop(df[df['Ride State'] == 'Cancelled'].index, inplace = True)
 df.drop(df[df['Stop State'] == 'Skipped'].index, inplace = True)
 df.drop(df[df['Stop State'] == 'Awaiting'].index, inplace = True)
+
+# Removing exact duplicate rows
+df.drop_duplicates(inplace=True)
 
 # converting to datetime
 date_format = '%Y/%m/%d'
@@ -72,7 +76,7 @@ layout = html.Div([
         html.Div([
             dcc.Dropdown(
                 id='day-of-week-selector',
-                options=[{'label': day, 'value': day} for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']] + [{'label': 'Everyday', 'value': 'Everyday'}],
+                options=[{'label': day, 'value': day} for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']] + [{'label': 'Weekend', 'value': ['Saturday','Sunday']}] + [{'label': 'Everyday', 'value': 'Everyday'}],
                 value='Everyday',
                 style={'font-family': 'Segoe UI', 'padding': '0 2em'}
             )
@@ -171,20 +175,26 @@ layout = html.Div([
     [Input("route-selector", "value"),
      Input("date-slider", "start_date"),
      Input("date-slider", "end_date"),
-     Input("calc-method-dropdown", "value")]
+     Input("calc-method-dropdown", "value"),
+     Input("day-of-week-selector", "value")]
 )
-def update_semester_ridership_graph(selected_route, start_date, end_date, calc_method):
+def update_semester_ridership_graph(selected_route, start_date, end_date, calc_method, selected_day):
     # Filter data for the selected route and date range
     filtered_df = df.loc[
                     (df['Route'] == selected_route) & 
                     (df['Day'] >= start_date) & 
                     (df['Day'] <= end_date)
                 ].copy()
+    
+    if isinstance(selected_day, list):  # Check if selected_day is a list (for 'Weekend')
+        filtered_df = filtered_df[filtered_df['Day of Week'].isin(selected_day)]
+    elif selected_day != 'Everyday':  # Handle individual days
+        filtered_df = filtered_df[filtered_df['Day of Week'] == selected_day]
+
 
     # Add Semester column based on date
-    filtered_df['Semester'] = filtered_df['Day'].apply(
-        lambda x: f"Spring {x.year}" if x.month < 6 else f"Fall {x.year}"
-    )
+    filtered_df['Semester'] = 'Fall ' + filtered_df['Day'].dt.year.astype(str)
+    filtered_df.loc[filtered_df['Day'].dt.month < 6, 'Semester'] = 'Spring ' + filtered_df['Day'].dt.year.astype(str)
 
     filtered_df['Riders On'] = pd.to_numeric(filtered_df['Riders On'], errors='coerce')
     filtered_df = filtered_df.dropna(subset=['Riders On'])  # Drop rows with NaN values
@@ -198,16 +208,15 @@ def update_semester_ridership_graph(selected_route, start_date, end_date, calc_m
     # Group by Semester
     # grouped = filtered_df.groupby('Semester')['Riders On'].agg(calc_method.lower()).reset_index()
 
-    # Create bar graph
-    fig = px.bar(
+    # Create pie chart
+    fig = px.pie(
         grouped,
-        x="Semester",
-        y="Riders On",
-        text="Riders On",
+        names='Semester',
+        values='Riders On',
         title="Ridership by Semester",
-        labels={"Semester": "Semester", "Riders On": "Riders On"}
+        labels={"Semester": "Semester", "Riders On": "Riders On"},
     )
-    fig.update_traces(textposition="auto")
+    fig.update_traces(textposition="auto", textinfo='value')
     return fig
 
 
@@ -222,36 +231,46 @@ def update_semester_ridership_graph(selected_route, start_date, end_date, calc_m
 def update_monthly_ridership_graph(selected_route, start_date, end_date, calc_method):
     # Filter data for the selected route and date range
     filtered_df = df.loc[
-                    (df['Route'] == selected_route) & 
-                    (df['Day'] >= start_date) & 
-                    (df['Day'] <= end_date)
-                ].copy()
-    
-    # Add Month-Year column
-    filtered_df['Month'] = filtered_df['Day'].dt.strftime('%B %Y')
+        (df['Route'] == selected_route) & 
+        (df['Day'] >= start_date) & 
+        (df['Day'] <= end_date)
+    ].copy()
 
+    # Add two columns: one for Month-Year as datetime (for sorting) and one for text (for displaying)
+    filtered_df['Month'] = filtered_df['Day'].dt.to_period('M').dt.to_timestamp()
+    filtered_df['Month_Text'] = filtered_df['Day'].dt.strftime('%B %Y')
+
+    # Convert 'Riders On' to numeric and drop NaN values
     filtered_df['Riders On'] = pd.to_numeric(filtered_df['Riders On'], errors='coerce')
-    filtered_df = filtered_df.dropna(subset=['Riders On'])  # Drop rows with NaN values
-    
+    filtered_df = filtered_df.dropna(subset=['Riders On'])
+
+    # Group data by Month
     if calc_method == 'Average':
-        # filtered_df['Riders On'] = pd.to_numeric(filtered_df['Riders On'], errors='coerce')
         grouped = filtered_df.groupby('Month')['Riders On'].mean().reset_index()
     else:
         grouped = filtered_df.groupby('Month')['Riders On'].sum().reset_index()
 
+    # Add the text version of the Month-Year to the grouped DataFrame for display
+    grouped['Month_Text'] = grouped['Month'].dt.strftime('%B %Y')
+    grouped = grouped.sort_values(by='Month', ascending=True)
+
     # Create bar graph
     fig = px.bar(
         grouped,
-        x="Month",
+        x="Month_Text",  # Display the text version of Month-Year
         y="Riders On",
         text="Riders On",
         title="Ridership by Month",
-        labels={"Month": "Month", "Riders On": "Riders On"}
+        labels={"Month_Text": "Month", "Riders On": "Riders On"}
     )
     fig.update_traces(textposition="auto")
-    fig.update_layout(xaxis_tickangle=-45)
-    return fig
 
+    # Sort by the datetime column for chronological order
+    fig.update_layout(
+        xaxis_tickangle=-45
+    )
+
+    return fig
 
 ########## BY-WEEK VISUALIZATIONS + DROPDOWNS ##########
 @callback(
@@ -424,7 +443,9 @@ def update_ridership_30min_time_graph(selected_route, start_date, end_date, sele
                      (df['Day'] >= start_date) & 
                      (df['Day'] <= end_date)]
     
-    if selected_day != 'Everyday':
+    if isinstance(selected_day, list):  # Check if selected_day is a list (for 'Weekend')
+        filtered_df = filtered_df[filtered_df['Day of Week'].isin(selected_day)]
+    elif selected_day != 'Everyday':  # Handle individual days
         filtered_df = filtered_df[filtered_df['Day of Week'] == selected_day]
 
     # Generate 30-minute time blocks from 00:00 to 23:59
