@@ -7,14 +7,16 @@ System prequisites:
 
 ### Directory Overview
 This is
-    DSI_TransportationRidership_Revised/
-    │-- data/        # Contains raw and processed datasets
-    │-- docs/        # Documents for README
-    │-- pages/       # Dashboard application pages from Python Dash
-    │-- static/      # Static assets (CSS, JavaScript, images)
-    │-- utils/       # Utility scripts for data processing
-    │-- run.py       # Main script to launch the application
-    │-- README.md    # Project documentation
+```
+Transportation Coordinator Dashboard/
+│-- data/        # Contains raw and processed datasets
+│-- docs/        # Documents for README
+│-- pages/       # Dashboard application pages from Python Dash
+│-- static/      # Static assets (CSS, JavaScript, images)
+│-- utils/       # Utility scripts for data processing
+│-- run.py       # Main script to launch the application
+│-- README.md    # Project documentation
+```
 
 #### Time
 This page provides an in-depth analysis of a specific route’s ridership data, starting from the semester level and drilling down to detailed time-based trends for individual stops. The following visualizations are included:
