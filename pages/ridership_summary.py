@@ -15,10 +15,12 @@ script_dir = os.path.dirname(__file__)
 
 # Construct the full path to the CSV file
 # file_name = 'RidershipData.csv'
-file_name = 'Fall2024_RidershipData.csv'
+# file_name = 'Fall2024_RidershipData.csv'
 # file_name = '051524-051924_RidershipData.csv'
+file_name = 'mock_ridership_data.csv'
 
-file_path = os.path.join(script_dir, '..', 'data', file_name)
+# file_path = os.path.join(script_dir, '..','.gitignore','data', file_name)
+file_path = os.path.join(script_dir, '..','data', file_name)
 
 # Read the CSV file
 df = pd.read_csv(file_path)

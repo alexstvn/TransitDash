@@ -14,12 +14,14 @@ from plotly.subplots import make_subplots
 script_dir = os.path.dirname(__file__)
 
 # Construct the full path to the CSV file
-file_name = 'RidershipData.csv'
+# file_name = 'RidershipData.csv'
 # file_name = 'Fall2024_RidershipData.csv'
 # file_name = '20250205_RidershipData.csv'
 # file_name = 'Summer2024_RidershipData.csv'
 # file_name = '051524-051924_RidershipData.csv'
+file_name = 'mock_ridership_data.csv'
 
+# file_path = os.path.join(script_dir, '..','.gitignore','data', file_name)
 file_path = os.path.join(script_dir, '..','data', file_name)
 
 # Read the CSV file
@@ -56,7 +58,7 @@ dash.register_page(__name__, title="Ridership over Dates and Time")
 
 # Layout
 layout = html.Div([
-    html.H1("Ridership Summary", style={'font-family': 'Segoe UI', 'padding': '0 2em'}),
+    html.H1("Ridership by Time", style={'font-family': 'Segoe UI', 'padding': '0 2em'}),
 
     # AVERAGE STOP RIDERSHIP GRAPH
     # dcc.Graph(id='stop-bar-chart'), # MOVE TO STOP UTILIZATION

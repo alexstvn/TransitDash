@@ -15,10 +15,12 @@ script_dir = os.path.dirname(__file__)
 
 # Construct the full path to the CSV file
 # file_name = 'RidershipData.csv'
-file_name = 'Fall2024_RidershipData.csv'
+# file_name = 'Fall2024_RidershipData.csv'
 # file_name = 'Summer2024_RidershipData.csv'
 # file_name = '051524-051924_RidershipData.csv'
+file_name = 'mock_ridership_data.csv'
 
+# file_path = os.path.join(script_dir, '..','.gitignore','data', file_name)
 file_path = os.path.join(script_dir, '..','data', file_name)
 
 # Read the CSV file
@@ -34,7 +36,7 @@ days_of_week_order = [
 ]
 
 ################### DASH APP ###################
-dash.register_page(__name__)
+dash.register_page(__name__, title="Ridership by Stops")
 
 layout = html.Div([
     # FILTERING OPTIONS
@@ -97,7 +99,7 @@ layout = html.Div([
 
 ###### TOP/BOTTOM 5 OVERALL ######
 @callback(
-    Output('top-5-bar-overall-chart', 'figure'),
+    Output('top-5-overall-bar-chart', 'figure'),  # corrected ID
     [Input('route-selector', 'value'),
      Input('date-slider', 'start_date'),
      Input('date-slider', 'end_date'),
@@ -111,11 +113,12 @@ def update_top_5_chart(selected_route, start_date, end_date, selected_riders):
     sorted_df = filtered_df.groupby(['Stop'])[selected_riders].sum().sort_values(ascending=False).head(10)
     
     title = f'Top 10 Stops by {selected_riders} for Route {selected_route}'
-    fig = px.bar(sorted_df, x=selected_riders, y=sorted_df.index, title=title, color_discrete_sequence=['green'], text_auto=True, orientation='h')  # Set orientation to 'h' for horizontal bars
+    fig = px.bar(sorted_df, x=selected_riders, y=sorted_df.index, title=title, color_discrete_sequence=['green'], text_auto=True, orientation='h')
     return fig
 
+
 @callback(
-    Output('bottom-5-bar-overall-chart', 'figure'),
+    Output('bottom-5-overall-bar-chart', 'figure'),  # corrected ID
     [Input('route-selector', 'value'),
      Input('date-slider', 'start_date'),
      Input('date-slider', 'end_date'),
@@ -129,7 +132,7 @@ def update_bottom_5_chart(selected_route, start_date, end_date, selected_riders)
     sorted_df = filtered_df.groupby(['Stop'])[selected_riders].sum().sort_values().head(10)
     
     title = f'Bottom 10 Stops by {selected_riders} for Route {selected_route}'
-    fig = px.bar(sorted_df, x=selected_riders, y=sorted_df.index, title=title, color_discrete_sequence=['red'], text_auto=True, orientation='h')  # Set orientation to 'h' for horizontal bars
+    fig = px.bar(sorted_df, x=selected_riders, y=sorted_df.index, title=title, color_discrete_sequence=['red'], text_auto=True, orientation='h')
     return fig
 
 ###### TOP/BOTTOM 5 BY DAY OF WEEK ######
@@ -192,7 +195,7 @@ def update_graphs(riders_option, selected_route, aggregation_option, start_date,
 def update_stop_selector_options(selected_route):
     stops_for_route = df[df['Route'] == selected_route]['Stop'].unique()
     stop_options = [{'label': stop, 'value': stop} for stop in stops_for_route]
-    return stop_options, stops_for_route  # Set the initial value
+    return stop_options, list(stops_for_route)
 
 # RIDERSHIP BY STOP
 @callback(
@@ -232,6 +235,11 @@ def update_stop_bar_chart(selected_route, start_date, end_date, selected_stops, 
                 textposition='auto'  # Position text labels to be visible
             )
     ])
+
     
     fig.update_layout(barmode='group', title=f'{calc_method} Riders On and Off at Stops for Route {selected_route}')
+
+    if filtered_df.empty:
+        return go.Figure(layout={'title': 'No data found for selected filters.'})
+    
     return fig
