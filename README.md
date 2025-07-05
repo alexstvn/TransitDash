@@ -42,8 +42,6 @@ The **Time** page allows you to explore ridership across multiple granularities.
 
 By default, the dashboard displays ridership trends for the entire date range defined by the filters at the top of the page.
 
----
-
 ### Stop Utilization
 The **Stop Utilization** page highlights which stops are most and least frequented. It includes:
 - Top and bottom **10 stops** by ridership (adjustable in code)
