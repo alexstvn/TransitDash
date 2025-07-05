@@ -40,12 +40,15 @@ The **Time** page allows you to explore ridership across multiple granularities.
 - Ridership in **30-min intervals**
 - Ridership by **scheduled time** at any selected stop
 
+![Ridership by Time](assets/RidershipSummaryWaltham.gif)
+
 By default, the dashboard displays ridership trends for the entire date range defined by the filters at the top of the page.
 
 ### Stop Utilization
 The **Stop Utilization** page highlights which stops are most and least frequented. It includes:
 - Top and bottom **10 stops** by ridership (adjustable in code)
 - Daily ridership breakdowns for each day of the week across these top and bottom stops
+
 ![Ridership by Stop](assets/RidershipByStop.gif)
 
 ---
