@@ -1,7 +1,7 @@
-# Brandeis Transportation Coordinator Dashboard
+# TransitDash: Ridership Data Analysis
 
 ## 📖 Overview
-This project provides a **Python Dash** dashboard designed to help the Brandeis Transportation office analyze ridership trends across their campus shuttle routes. By visualizing historical and real-time ridership data, this tool supports data-driven decisions such as:
+This project provides a **Python Dash** dashboard designed to help the my former work's transportation office analyze ridership trends across their campus shuttle routes. By visualizing historical and real-time ridership data, this tool supports data-driven decisions such as:
 - Adjusting vehicle capacity
 - Modifying service hours
 - Identifying under- or over-utilized stops
@@ -20,7 +20,7 @@ Before using this dashboard, ensure you have the following installed:
 
 ## Directory Structure
 ```
-Transportation-Coordinator-Dashboard/
+TransitDash/
 │-- data/ # Raw and processed datasets
 │-- docs/ # Documentation and assets for the README
 │-- pages/ # Application pages (Dash)
@@ -64,8 +64,8 @@ This project is under active development. Upcoming enhancements include:
 ## Usage
 1. Clone the repository:
    ```bash
-   git clone https://github.com/alexstvn/Transportation-Coordinator-Dashboard.git
-   cd Transportation-Coordinator-Dashboard
+   git clone https://github.com/alexstvn/TransitDash.git
+   cd TransitDash
    ```
 2. Install dependencies
     ```
